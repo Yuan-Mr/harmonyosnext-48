@@ -1,176 +1,159 @@
-## 鸿蒙宝藏案例：AI图文编创开发实战，让你的应用更智能！
+## HarmonyOS Treasure Case: AI Image-Text Creation Development Battle Practice, Making Your Applications Smarter!  
 
-> 还在为HarmonyOS开发找不到优质案例发愁？今天分享一个超实用的AI图文编创场景实现方案，手把手教你打造智能社交通讯应用！
+> Still worried about not finding high-quality cases for HarmonyOS development? Today, I share a super-practical implementation plan for the AI image-text creation scenario, teaching you step-by-step to build intelligent social communication applications!  
 
-### 一、场景概述：让图文创作飞起来
 
-这个方案专为社交通讯类应用设计，通过HarmonyOS三大核心能力实现革命性体验升级：
+### I. Scenario Overview: Making Image-Text Creation Take Off  
+This solution is designed for social communication applications, achieving revolutionary experience upgrades through three core HarmonyOS capabilities:  
+- **Free Flow**: Edit halfway on a mobile phone, continue on a tablet  
+- **Service Interoperability**: Cross-device camera/album invocation  
+- **HarmonyOS Intelligence**: AI image matting + text recognition  
 
--   ​**​自由流转​**​：手机编辑一半，平板接着改
--   ​**​服务互通​**​：跨设备调用相机/相册
--   ​**​鸿蒙智能​**​：AI抠图+文字识别
+```typescript  
+// Initialize image picker (no permission application needed!)  
+const photoViewPicker = new photoAccessHelper.PhotoViewPicker();  
+const photoSelectOptions = new photoAccessHelper.PhotoSelectOptions();  
+photoSelectOptions.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;  
+photoSelectOptions.maxSelectNumber = 9; // Up to 9 images  
 
-```
-// 初始化图片选择器（免权限申请！）
-const photoViewPicker = new photoAccessHelper.PhotoViewPicker();
-const photoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
-photoSelectOptions.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
-photoSelectOptions.maxSelectNumber = 9; // 最多选9张图
-
-// 获取选中图片URI
-photoViewPicker.select(photoSelectOptions).then((result) => {
-  console.log("选中图片URI:", result.photoUris);
+// Get selected image URIs  
+photoViewPicker.select(photoSelectOptions).then((result) => {  
+  console.log("Selected image URIs:", result.photoUris);  
 });
-```
+```  
 
-### 二、三大核心优势解析
 
-1.  ​**​跨设备资源调用​**​
+### II. Analysis of Three Core Advantages  
+1. **Cross-Device Resource Invocation**  
+   - Tablets directly call the mobile phone's camera for photos  
+   - Computers access the mobile phone's album to select images  
+   - Say goodbye to data cable transmission!  
 
-    -   平板直接调用手机的相机拍照
-    -   电脑访问手机相册选图
-    -   彻底告别数据线传输！
+1. **AI Intelligent Creation**  
+   - Long-press images for automatic matting  
+   - Intelligent text recognition in images  
+   - HDR Vivid high-definition rendering  
 
-1.  ​**​AI智能创作​**​
+1. **Seamless Continuation Editing**  
+   - Editing content is real-time synchronized across multiple devices  
+   - Distributed file system automatically syncs materials  
 
-    -   长按图片自动抠图
-    -   图片文字智能识别
-    -   HDR Vivid高清渲染
 
-1.  ​**​无缝接续编辑​**​
+### III. Detailed Explanation of Key Function Implementation  
+#### 1. AI Image Processing (OCR + Matting)  
+```typescript  
+// Enable intelligent image analysis  
+Image(item)  
+  .enableAnalyzer(true) // Enable AI analyzer  
+  .dynamicRangeMode(DynamicRangeMode.HIGH) // HDR mode  
 
-    -   编辑内容实时同步多设备
-    -   分布式文件系统自动同步素材
-
-### 三、关键功能实现详解
-
-#### 1. AI图片处理（OCR+抠图）
-
-```
-// 开启图片智能分析
-Image(item)
-  .enableAnalyzer(true) // 启用AI分析器
-  .dynamicRangeMode(DynamicRangeMode.HIGH) // HDR模式
-
-// 文字识别回调
-onTextRecognized = (textBlocks) => {
-  textBlocks.forEach(block => {
-    console.log("识别到文字:", block.text);
-  });
+// Text recognition callback  
+onTextRecognized = (textBlocks) => {  
+  textBlocks.forEach(block => {  
+    console.log("Recognized text:", block.text);  
+  });  
 }
-```
+```  
+**Effect**: Long-press text in images for automatic recognition, long-press objects for one-click matting, and copy text directly for editing!  
 
-​**​效果​**​：长按图片中的文字自动识别，长按物体一键抠图，复制文字直接用于编辑！
+#### 2. Moving Photo Shooting  
+```typescript  
+// Enable moving photo shooting mode  
+setEnableLivePhoto(true) {  
+  if (this.photoOutput?.isMovingPhotoSupported()) {  
+    this.photoOutput?.enableMovingPhoto(true); // Enable moving photo mode  
+  }  
+}  
 
-#### 2. 动图拍摄（Moving Photo）
-
-```
-// 启用动图拍摄模式
-setEnableLivePhoto(true) {
-  if (this.photoOutput?.isMovingPhotoSupported()) {
-    this.photoOutput?.enableMovingPhoto(true); // 开启动图模式
-  }
-}
-
-// 动图展示组件
-MovingPhotoView({
-  movingPhoto: this.movingData, // 动图数据
-  controller: this.movingController
+// Moving photo display component  
+MovingPhotoView({  
+  movingPhoto: this.movingData, // Moving photo data  
+  controller: this.movingController  
 })
-```
+```  
+**Tip**: Delay 300ms to get data after shooting, use `getThumbnail()` to get preview images.  
 
-​**​技巧​**​：拍摄后需延迟300ms获取数据，使用`getThumbnail()`获取预览图
+#### 3. Cross-Device Camera Invocation  
+```typescript  
+// Create device selection menu  
+Menu() {  
+  createCollaborationServiceMenuItems([CollaborationServiceFilter.ALL]);  
+}  
 
-#### 3. 跨设备相机调用
-
-```
-// 创建设备选择菜单
-Menu() {
-  createCollaborationServiceMenuItems([CollaborationServiceFilter.ALL]);
+// Receive cross-device photos  
+doInsertPicture(stateCode, bufferType, buffer) {  
+  if (stateCode === 0 && bufferType === 'image/jpeg') {  
+    const uri = await FileUtils.saveFile(buffer); // Save locally  
+    this.photoUris.unshift(uri); // Add to editing list  
+  }  
 }
+```  
+**Device Limitations**:  
+- Tablets can call mobile cameras ✅  
+- Mobiles cannot call tablets ❌  
+- Require logging in with the same Huawei account  
 
-// 接收跨端拍摄的照片
-doInsertPicture(stateCode, bufferType, buffer) {
-  if (stateCode === 0 && bufferType === 'image/jpeg') {
-    const uri = await FileUtils.saveFile(buffer); // 保存到本地
-    this.photoUris.unshift(uri); // 添加到编辑列表
-  }
-}
-```
 
-​**​设备限制​**​：
-
--   平板可调用手机相机 ✅
--   手机不可调用平板 ❌
--   需登录相同华为账号
-
-### 四、自由流转黑科技
-
-#### 配置接续能力
-
-```
-// module.json5配置
-"abilities": [{
-  "continuable": true // 启用接续能力
-}],
-"requestPermissions": [{
-  "name": "ohos.permission.DISTRIBUTED_DATASYNC"
+### IV. Free Flow Black Technology  
+#### Configure Continuation Capability  
+```json5  
+// module.json5 configuration  
+"abilities": [{  
+  "continuable": true // Enable continuation capability  
+}],  
+"requestPermissions": [{  
+  "name": "ohos.permission.DISTRIBUTED_DATASYNC"  
 }]
-```
+```  
 
-#### 核心流转代码
+#### Core Flow Code  
+```typescript  
+// Sender (migrating device)  
+onContinue(wantParam) {  
+  wantParam['title'] = AppStorage.get('currentTitle');  
+  wantParam['photos'] = photoUris.join('|');  
+  return AbilityConstant.OnContinueResult.AGREE;  
+}  
 
-```
-// 发送端（迁移设备）
-onContinue(wantParam) {
-  wantParam['title'] = AppStorage.get('currentTitle');
-  wantParam['photos'] = photoUris.join('|');
-  return AbilityConstant.OnContinueResult.AGREE;
+// Receiver (continuing device)  
+onCreate(want) {  
+  if (want.launchReason === AbilityConstant.LaunchReason.CONTINUATION) {  
+    const photos = want.parameters['photos'].split('|');  
+    AppStorage.set('currentPhotos', photos); // Restore editing state  
+  }  
 }
+```  
+**File Synchronization Tip**: Large files are synchronized via the distributed file system, and data below 100KB is directly passed through wantParam.  
 
-// 接收端（接续设备）
-onCreate(want) {
-  if (want.launchReason === AbilityConstant.LaunchReason.CONTINUATION) {
-    const photos = want.parameters['photos'].split('|');
-    AppStorage.set('currentPhotos', photos); // 恢复编辑状态
-  }
-}
-```
 
-​**​文件同步技巧​**​：大文件通过分布式文件系统同步，100KB以下数据直接通过wantParam传递
+### V. Development Pitfall Prevention Guide  
+1. **Permission Application**: 5 permissions need to be declared for camera services  
+   ```typescript  
+   const camPermissions = [  
+     'ohos.permission.CAMERA',  
+     'ohos.permission.MICROPHONE',  
+     'ohos.permission.READ_IMAGEVIDEO'  
+   ];  
+   ```  
 
-### 五、开发避坑指南
+1. **Device Compatibility**: Check device type before service interoperability  
+   ```typescript  
+   if (device.type === 'tablet') {  
+     showCollaborationMenu(); // Tablets display device menus  
+   }  
+   ```  
 
-1.  ​**​权限申请​**​：相机服务需要声明5个权限
+1. **Performance Optimization**: Use asynchronous decoding for large image processing  
+   ```typescript  
+   image.createImageSource(fd).createPixelMapAsync().then(pixelMap => {  
+     // Asynchronously get pixel data  
+   });  
+   ```  
 
-    ```
-    const camPermissions = [
-      'ohos.permission.CAMERA',
-      'ohos.permission.MICROPHONE',
-      'ohos.permission.READ_IMAGEVIDEO'
-    ];
-    ```
 
-1.  ​**​设备兼容​**​：服务互通前检查设备类型
+### Conclusion  
+This case perfectly demonstrates the advantages of HarmonyOS in cross-device collaboration and AI capabilities. Free flow enables seamless device switching, and combined with AI intelligent processing, it significantly improves creation efficiency. It is recommended to focus on studying service interoperability components and the distributed file system—these two features can truly bring qualitative leaps in development!  
 
-    ```
-    if (device.type === 'tablet') {
-      showCollaborationMenu(); // 平板显示设备菜单
-    }
-    ```
+**Try it out!** The complete chain from album selection → AI processing → cross-device editing can shorten development time by 40%! If you encounter problems, feel free to ask in the comments. Search for the keyword "AI image-text creation" to find official answers~  
 
-1.  ​**​性能优化​**​：大图片处理使用异步解码
-
-    ```
-    image.createImageSource(fd).createPixelMapAsync().then(pixelMap => {
-      // 异步获取像素数据
-    });
-    ```
-
-### 结语
-
-这个案例完美展示了HarmonyOS在跨设备协同和AI能力上的优势。通过自由流转实现设备无感切换，结合AI智能处理大幅提升创作效率。建议重点研究服务互通组件和分布式文件系统，这两个特性在开发中真的能带来质的飞跃！
-
-​**​动手试试吧​**​：从相册选择→AI处理→跨设备编辑的完整链路，开发时间可缩短40%！遇到问题欢迎在评论区提问，搜索关键词“AI图文编创”即可找到官方解答~
-
-> 更多HarmonyOS宝藏案例持续分享中，关注我获取最新开发技巧！ #HarmonyOS开发 #AI图文创作 #跨端协同
+> More HarmonyOS treasure cases are being shared continuously. Follow me for the latest development tips! #HarmonyOSDevelopment #AIImageTextCreation #CrossDeviceCollaboration
